@@ -1,0 +1,14 @@
+{
+  "name": "soar-performance-tests",
+  "version": "1.0.0",
+  "description": "Performance tests for Soar application",
+  "scripts": {
+    "test": "artillery run artillery/config.yml",
+    "test:report": "artillery run --output report.json artillery/config.yml && artillery report report.json",
+    "test:quick": "artillery quick --count 10 --num 10 http://localhost:5001"
+  },
+  "dependencies": {
+    "@faker-js/faker": "^8.0.0",
+    "artillery": "^2.0.0-38"
+  }
+}

@@ -1,0 +1,55 @@
+name: Performance Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  performance-test:
+    runs-on: ubuntu-latest
+    
+    services:
+      flask:
+        image: python:3.9
+        ports:
+          - 5000:5000
+        options: --health-cmd "curl http://localhost:5000" --health-interval 10s --health-timeout 5s --health-retries 5
+
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.9'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -r flask-app/requirments.txt
+    
+    - name: Start Flask Application
+      run: |
+        cd flask-app
+        python task.py &
+        sleep 5  # Wait for the application to start
+      
+    - name: Run Load Tests
+      run: |
+        locust -f locustfile.py --host=http://localhost:5000 --users 10 --spawn-rate 1 --run-time 30s --headless --only-summary --html performance-report.html
+      
+    - name: Run BDD Tests
+      run: |
+        behave --format=json.pretty -o test-results.json
+      
+    - name: Upload Performance Results
+      uses: actions/upload-artifact@v2
+      with:
+        name: performance-results
+        path: |
+          performance-report.html
+          test-results.json

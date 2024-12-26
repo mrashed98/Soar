@@ -1,0 +1,4 @@
+locust==2.15.1
+behave==1.2.6
+faker==19.3.0
+requests==2.31.0

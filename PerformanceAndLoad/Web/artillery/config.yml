@@ -1,0 +1,46 @@
+config:
+  target: "http://localhost:5001"
+  phases:
+    - name: "Warm up"
+      duration: 30
+      arrivalRate: 1
+      rampTo: 5
+    - name: "Load test"
+      duration: 60
+      arrivalRate: 5
+      rampTo: 10
+    - name: "Stress test"
+      duration: 30
+      arrivalRate: 10
+      rampTo: 20
+  processor: "./functions.js"
+  defaults:
+    headers:
+      Content-Type: "application/x-www-form-urlencoded"
+
+scenarios:
+  - name: "Client Registration Flow"
+    weight: 3
+    flow:
+      - post:
+          url: "/client_registeration"
+          beforeRequest: "generateRegistrationData"
+          expect:
+            - statusCode: 200
+            - contentType: "application/json"
+          capture:
+            - json: "$.msg"
+              as: "registrationMessage"
+
+  - name: "Client Login Flow"
+    weight: 2
+    flow:
+      - post:
+          url: "/client_login"
+          beforeRequest: "generateLoginData"
+          expect:
+            - statusCode: 200
+            - contentType: "application/json"
+          capture:
+            - json: "$.token"
+              as: "authToken"
